@@ -2,32 +2,36 @@ const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const { toNodeHandler } = require('better-auth/node'); // 1. Better Auth Handler
+const { auth } = require('./auth'); // 2. আপনার auth.js ফাইল
 
 dotenv.config();
 
 const app = express();
 
-// 1. CORS Configuration (Fixes Invalid Origin / CORS Error)
+// 1. CORS Configuration
 const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:5173',
   'https://rent-nest-git-main-partho019das-projects.vercel.app',
-  'https://rentnest.vercel.app', // আপনার মূল ফ্রন্টএন্ড ডোমেইন
+  'https://rentnest.vercel.app',
 ];
 
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Allow requests with no origin (like mobile apps, curl, or server-to-server)
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
-        callback(null, true); // Dev/Testing সুবিধার জন্য True রাখা হয়েছে
+        callback(null, true);
       }
     },
-    credentials: true, // Auth Cookies/Headers পাস হওয়ার জন্য জরুরি
+    credentials: true,
   })
 );
+
+// 2. Mount Better Auth Routes (এটি অবশ্যই এক্সপ্রেস রাউটের আগে থাকতে হবে)
+app.all('/api/auth/*', toNodeHandler(auth));
 
 app.use(express.json());
 
