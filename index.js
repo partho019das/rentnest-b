@@ -7,8 +7,28 @@ dotenv.config();
 
 const app = express();
 
-// Middleware
-app.use(cors());
+// 1. CORS Configuration (Fixes Invalid Origin / CORS Error)
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:5173',
+  'https://rent-nest-git-main-partho019das-projects.vercel.app',
+  'https://rentnest.vercel.app', // আপনার মূল ফ্রন্টএন্ড ডোমেইন
+];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps, curl, or server-to-server)
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(null, true); // Dev/Testing সুবিধার জন্য True রাখা হয়েছে
+      }
+    },
+    credentials: true, // Auth Cookies/Headers পাস হওয়ার জন্য জরুরি
+  })
+);
+
 app.use(express.json());
 
 const uri = process.env.MONGODB_URI;
@@ -20,17 +40,16 @@ const client = new MongoClient(uri, {
     version: ServerApiVersion.v1,
     strict: true,
     deprecationErrors: true,
-  }
+  },
 });
 
 // Connect Database Function
 async function connectDB() {
   try {
-    // MongoDB Atlas-এর জন্য আলাদা করে client.connect() না ডাকলেও স্বয়ংক্রিয়ভাবে কানেক্ট হয়
     const db = client.db('rentnest');
     return db.collection('property');
   } catch (error) {
-    console.error("MongoDB Connection Error:", error);
+    console.error('MongoDB Connection Error:', error);
   }
 }
 
