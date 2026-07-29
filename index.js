@@ -2,7 +2,6 @@ const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
-const { auth } = require('./auth'); // auth.js ফাইল ইমপোর্ট
 
 dotenv.config();
 
@@ -28,12 +27,6 @@ app.use(
     credentials: true,
   })
 );
-
-// 2. Mount Better Auth with Dynamic Import (Fixes 'Cannot find module' in Vercel/Node)
-app.all('/api/auth/*', async (req, res) => {
-  const { toNodeHandler } = await import('better-auth/node');
-  return toNodeHandler(auth)(req, res);
-});
 
 app.use(express.json());
 
